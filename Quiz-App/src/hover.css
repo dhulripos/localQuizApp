@@ -1,0 +1,4 @@
+/* ホバー時のスタイル */
+.hover-row:hover {
+  background-color: #e6f2ff; /* 薄い青色の背景色 */
+}

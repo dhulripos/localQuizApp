@@ -1,0 +1,54 @@
+/* ポップアップコンテナ */
+.popup-container {
+  position: fixed;
+  /* 固定位置 */
+  top: 0;
+  left: 0;
+  width: 100%;
+  /* 画面全体の幅 */
+  height: 100%;
+  /* 画面全体の高さ */
+  background-color: rgba(0, 0, 0, 0.5);
+  /* 背景色と透明度を設定 */
+  display: flex;
+  justify-content: center;
+  /* 横方向に中央配置 */
+  align-items: center;
+  /* 縦方向に中央配置 */
+  z-index: 9999;
+  /* より前面に表示 */
+}
+
+/* デフォルトコンテナ */
+.default-container {
+  position: fixed;
+  /* 固定位置 */
+  top: 0;
+  left: 0;
+  width: 100%;
+  /* 画面全体の幅 */
+  height: 100%;
+  /* 画面全体の高さ */
+  display: flex;
+  justify-content: center;
+  /* 横方向に中央配置 */
+  align-items: center;
+  /* 縦方向に中央配置 */
+}
+
+.tap-to-start {
+  font-size: 80px;
+  animation: blink-animation 1s infinite; /* 点滅するアニメーションを無限に繰り返す */
+}
+
+@keyframes blink-animation {
+  0% {
+    opacity: 1; /* 100%の透明度 */
+  }
+  50% {
+    opacity: 0; /* 50%の透明度 */
+  }
+  100% {
+    opacity: 1; /* 100%の透明度 */
+  }
+}

@@ -1,0 +1,163 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.app.mapper.QuizMapper">
+
+	<select id="getQuizzes" resultType="Quiz">
+		SELECT qz.quiz_id,qz.quiz,qz.answer,qz.answer_kana,gr.genre_id,gr.genre_name,qz.user_id,
+		qz.created_at,qz.updated_at 
+		FROM quiz qz
+		JOIN genre gr ON qz.genre_id = gr.genre_id
+		WHERE 
+			qz.delete_flag = 0
+			AND qz.issue_flag = 0
+			<if test="genreId != 0">
+			AND qz.genre_id = #{genreId} 
+			</if>
+		ORDER BY RAND() LIMIT #{num};
+	</select>
+	
+	<select id="getAllGenre">
+    SELECT *
+    FROM genre
+	</select>
+	
+	<select id="getGenreById" resultType="Genre">
+    SELECT *
+    FROM genre 
+    <if test="genreId != 0">
+    WHERE genre_id = #{genreId};
+    </if>
+  </select>
+  
+  <select id="getReview" resultType="Quiz">
+    SELECT q.quiz_id,q.quiz,q.answer,q.answer_kana,g.genre_id,g.genre_name,r.mistake_at,r.mistake_count,r.review_at 
+    FROM quiz q
+    JOIN review r ON q.quiz_id = r.quiz_id
+		JOIN genre g ON q.genre_id = g.genre_id
+		WHERE q.delete_flag = 0
+		AND q.issue_flag = 0
+		AND r.user_id = #{userId}
+		LIMIT #{offset}, #{numPerPage};
+  </select>
+  
+  <select id="gerReviewCount">
+    SELECT COUNT(*) 
+    FROM quiz q
+    JOIN review r ON q.quiz_id = r.quiz_id
+    WHERE q.delete_flag = 0
+    AND q.issue_flag = 0
+    AND r.user_id = #{userId};
+  </select>
+  
+  <select id="getDetailReview">
+    SELECT q.quiz_id, q.quiz, q.answer, q.answer_kana, g.genre_name
+    FROM quiz q
+    JOIN review r ON q.quiz_id = r.quiz_id
+    JOIN genre g ON r.genre_id = g.genre_id
+    WHERE r.user_id = #{userId}
+    AND r.quiz_id = #{quizId}
+    AND q.issue_flag = 0
+    AND q.delete_flag = 0;
+  </select>
+  
+  <select id="getSearchQuiz">
+    SELECT DISTINCT q.quiz_id,q.quiz,q.answer,q.answer_kana,g.genre_id,g.genre_name 
+    FROM quiz q
+    LEFT JOIN genre g ON q.genre_id = g.genre_id
+    WHERE q.delete_flag = 0
+    AND q.issue_flag = 0
+    AND (q.quiz LIKE CONCAT('%', #{word}, '%') 
+    OR q.answer LIKE CONCAT('%', #{word}, '%'))
+    LIMIT #{offset}, #{numPerPage};
+  </select>
+  
+    <select id="getSearchCount">
+    SELECT COUNT(*) 
+    FROM quiz q
+    WHERE q.delete_flag = 0
+    AND q.issue_flag = 0
+    AND (q.quiz LIKE CONCAT('%', #{word}, '%') 
+    OR q.answer LIKE CONCAT('%', #{word}, '%'));
+  </select>
+  
+  <select id="getSearchDetail">
+    SELECT DISTINCT q.quiz_id, q.quiz, q.answer, q.answer_kana, g.genre_name
+    FROM quiz q
+    JOIN genre g ON q.genre_id = g.genre_id
+    WHERE q.quiz_id = #{quizId}
+    AND q.issue_flag = 0
+    AND q.delete_flag = 0;
+  </select>
+  
+  <select id="calculateGenreAccuracy">
+    SELECT 
+		  ROUND(COALESCE((genre1_correct_num / NULLIF(genre1_all_answer_num, 0)), 0) * 100, 0) AS genre1CorrectPercent,
+		  ROUND(COALESCE((genre2_correct_num / NULLIF(genre2_all_answer_num, 0)), 0) * 100, 0) AS genre2CorrectPercent,
+		  ROUND(COALESCE((genre3_correct_num / NULLIF(genre3_all_answer_num, 0)), 0) * 100, 0) AS genre3CorrectPercent,
+		  ROUND(COALESCE((genre4_correct_num / NULLIF(genre4_all_answer_num, 0)), 0) * 100, 0) AS genre4CorrectPercent,
+		  ROUND(COALESCE((genre5_correct_num / NULLIF(genre5_all_answer_num, 0)), 0) * 100, 0) AS genre5CorrectPercent,
+		  ROUND(COALESCE((genre6_correct_num / NULLIF(genre6_all_answer_num, 0)), 0) * 100, 0) AS genre6CorrectPercent,
+		  ROUND(COALESCE((genre7_correct_num / NULLIF(genre7_all_answer_num, 0)), 0) * 100, 0) AS genre7CorrectPercent,
+		  ROUND(COALESCE((genre8_correct_num / NULLIF(genre8_all_answer_num, 0)), 0) * 100, 0) AS genre8CorrectPercent,
+		  ROUND(COALESCE((genre9_correct_num / NULLIF(genre9_all_answer_num, 0)), 0) * 100, 0) AS genre9CorrectPercent,
+		  ROUND(COALESCE((genre10_correct_num / NULLIF(genre10_all_answer_num, 0)), 0) * 100, 0) AS genre10CorrectPercent
+		FROM quiz_results
+		WHERE user_id = #{userId};
+  </select>
+  
+  <insert id="insertQuizForReview" parameterType="java.util.List">
+    INSERT INTO review 
+    (upsert_id,quiz_id,genre_id,user_id,mistake_at,mistake_count,review_at)
+    VALUES
+    <foreach collection="quiz" item="item" open="(" separator="),(" close=")">
+      #{item.upsertId, jdbcType=VARCHAR}, 
+      #{item.quizId, jdbcType=BIGINT}, 
+      #{item.genreId, jdbcType=BIGINT},
+      #{item.userId, jdbcType=VARCHAR},
+      #{item.mistakeAt, jdbcType=VARCHAR}, 
+      #{item.mistakeCount, jdbcType=BIGINT} + 1, 
+      #{item.reviewAt, jdbcType=VARCHAR}
+    </foreach>
+    ON DUPLICATE KEY UPDATE
+      upsert_id = VALUES(upsert_id),
+      quiz_id = VALUES(quiz_id),
+      genre_id = VALUES(genre_id),
+      user_id = VALUES(user_id),
+      mistake_at = VALUES(mistake_at),
+      mistake_count = mistake_count + 1,
+      review_at = VALUES(review_at);
+  </insert>
+  
+  <update id="updateQuizPoint">
+    UPDATE user_info 
+    SET user_point = user_point + #{userPoint} 
+    WHERE user_id = #{userId}
+  </update>
+  
+  <update id="updateCorrectPerQuiz" parameterType="QuizResult">
+    UPDATE quiz_results
+    SET
+      genre1_all_answer_num = genre1_all_answer_num + #{genre1AllAnswerNum},
+      genre1_correct_num = genre1_correct_num + #{genre1CorrectNum},
+      genre2_all_answer_num = genre2_all_answer_num + #{genre2AllAnswerNum},
+      genre2_correct_num = genre2_correct_num + #{genre2CorrectNum},
+      genre3_all_answer_num = genre3_all_answer_num + #{genre3AllAnswerNum},
+      genre3_correct_num = genre3_correct_num + #{genre3CorrectNum},
+      genre4_all_answer_num = genre4_all_answer_num + #{genre4AllAnswerNum},
+      genre4_correct_num = genre4_correct_num + #{genre4CorrectNum},
+      genre5_all_answer_num = genre5_all_answer_num + #{genre5AllAnswerNum},
+      genre5_correct_num = genre5_correct_num + #{genre5CorrectNum},
+      genre6_all_answer_num = genre6_all_answer_num + #{genre6AllAnswerNum},
+      genre6_correct_num = genre6_correct_num + #{genre6CorrectNum},
+      genre7_all_answer_num = genre7_all_answer_num + #{genre7AllAnswerNum},
+      genre7_correct_num = genre7_correct_num + #{genre7CorrectNum},
+      genre8_all_answer_num = genre8_all_answer_num + #{genre8AllAnswerNum},
+      genre8_correct_num = genre8_correct_num + #{genre8CorrectNum},
+      genre9_all_answer_num = genre9_all_answer_num + #{genre9AllAnswerNum},
+      genre9_correct_num = genre9_correct_num + #{genre9CorrectNum},
+      genre10_all_answer_num = genre10_all_answer_num + #{genre10AllAnswerNum},
+      genre10_correct_num = genre10_correct_num + #{genre10CorrectNum}
+    WHERE user_id = #{userId};
+  </update>
+
+</mapper>

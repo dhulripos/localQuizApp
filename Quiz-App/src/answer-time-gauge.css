@@ -1,0 +1,13 @@
+.gauge {
+  width: 500px; /* ゲージ全体の幅 */
+  height: 50px; /* ゲージ全体の高さ */
+  border: 1px solid #ccc; /* ゲージ全体の枠線 */
+  overflow: hidden; /* ゲージをはみ出させない */
+}
+
+.gauge-inner {
+  width: 100%; /* ゲージの初期幅（ゼロから開始） */
+  height: 100%;
+  background-color: #4caf50; /* ゲージの色 */
+  transition: width 1s; /* ゲージのアニメーション効果 */
+}
