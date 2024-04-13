@@ -15,7 +15,7 @@ public class ReactFilter implements Filter {
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
     HttpServletRequest req = (HttpServletRequest) request;
-//
+
     String requestURI = req.getRequestURI();
     String requestMethod = req.getMethod();
 
@@ -26,8 +26,7 @@ public class ReactFilter implements Filter {
       chain.doFilter(request, response);
       return;
     }
-//
-//    // 特定のURLのみReactアプリのindex.htmlを配信する
+    // 特定のURLのみReactアプリのindex.htmlを配信する
     if (!requestURI.startsWith("/api/") && !requestURI.endsWith(".css") && !requestURI.endsWith(".js")) {
       req.getRequestDispatcher("/index.html").forward(request, response);
       return;
@@ -35,5 +34,5 @@ public class ReactFilter implements Filter {
 
     chain.doFilter(request, response);
   }
-//
+
 }
