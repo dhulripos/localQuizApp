@@ -50,10 +50,14 @@ public class QuizServiceImpl implements QuizService {
     String formattedDate = sdf.format(date);
     // 生成した日付を各オブジェクトのmistakeAtにセット
     // 復習テーブルのPKを作る
-    for (int i = 0; i < quiz.size(); i++) {
-      quiz.get(i).setMistakeAt(formattedDate);
-      quiz.get(i).setUpsertId(quiz.get(i).getQuizId() + quiz.get(i).getUserId());
-    }
+//    for (int i = 0; i < quiz.size(); i++) {
+//      quiz.get(i).setMistakeAt(formattedDate);
+//      quiz.get(i).setUpsertId(quiz.get(i).getQuizId() + quiz.get(i).getUserId());
+//    }
+    quiz.stream().forEach(q -> {
+      q.setMistakeAt(formattedDate);
+      q.setUpsertId(q.getQuizId() + q.getUserId());
+    });
     qm.insertQuizForReview(quiz);
   }
 
