@@ -75,9 +75,12 @@ public class QuizController {
       return new ResponseEntity<>("Session Error", HttpStatus.BAD_REQUEST);
     }
     // セッションがControllerでしか使えないので、ここでuserIdをセットする
-    for (int i = 0; i < quizForReview.size(); i++) {
-      quizForReview.get(i).setUserId(userInfo.getUserId());
-    }
+//    for (int i = 0; i < quizForReview.size(); i++) {
+//      quizForReview.get(i).setUserId(userInfo.getUserId());
+//    }
+    quizForReview.stream().forEach(q -> {
+      q.setUserId(userInfo.getUserId());
+    });
 
     // 復習テーブルにinsertする
     qs.insertQuizForReview(quizForReview);
