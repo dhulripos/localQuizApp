@@ -32,7 +32,7 @@ public class QuizController {
 
   private static final int NUM_PER_PAGE = 4;
 
-  /*
+  /**
    * クイズ回答時に出題するクイズを取得するAPI
    * @param genre ジャンル(個別か全ジャンルか)。全ジャンル=genreId=0,個別はそれ以外
    */
@@ -56,7 +56,7 @@ public class QuizController {
     return new ResponseEntity<>(genreList, HttpStatus.OK);
   }
 
-  /*
+  /**
    * クイズ回答終了後、不正解となった問題を復習テーブルにinsertする処理
    * @param quizId,genreId,userId,mistakeAt(インクリメント),mistakeCount(インクリメント),reviewAt(更新の必要はないのでnull)
    */
